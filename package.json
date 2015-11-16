@@ -1,5 +1,5 @@
 {
-    "name": "react-native-camera",
+    "name": "@remobile/react-native-camera",
         "version": "1.0.0",
         "description": "A cordova camera for react-native, supprt for ios and android",
         "main": "index.js",
