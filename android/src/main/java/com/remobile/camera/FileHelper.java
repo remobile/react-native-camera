@@ -41,7 +41,7 @@ public class FileHelper {
      * If the given URI string represents a content:// URI, the real path is retrieved from the media store.
      *
      * @param uriString the URI string of the audio/image/video
-     * @param cordova the current application context
+     * @param cordova   the current application context
      * @return the full path to the file
      */
     @SuppressWarnings("deprecation")
@@ -49,15 +49,15 @@ public class FileHelper {
         String realPath = null;
 
         if (Build.VERSION.SDK_INT < 11)
-            realPath = FileHelper.getRealPathFromURI_BelowAPI11(((Activity)activityContext), uri);
+            realPath = FileHelper.getRealPathFromURI_BelowAPI11(((Activity) activityContext), uri);
 
-        // SDK >= 11 && SDK < 19
+            // SDK >= 11 && SDK < 19
         else if (Build.VERSION.SDK_INT < 19)
-            realPath = FileHelper.getRealPathFromURI_API11to18(((Activity)activityContext), uri);
+            realPath = FileHelper.getRealPathFromURI_API11to18(((Activity) activityContext), uri);
 
-        // SDK > 19 (Android 4.4)
+            // SDK > 19 (Android 4.4)
         else
-            realPath = FileHelper.getRealPathFromURI_API19(((Activity)activityContext), uri);
+            realPath = FileHelper.getRealPathFromURI_API19(((Activity) activityContext), uri);
 
         return realPath;
     }
@@ -66,7 +66,7 @@ public class FileHelper {
      * Returns the real path of the given URI.
      * If the given URI is a content:// URI, the real path is retrieved from the media store.
      *
-     * @param uri the URI of the audio/image/video
+     * @param uri     the URI of the audio/image/video
      * @param cordova the current application context
      * @return the full path to the file
      */
@@ -84,13 +84,13 @@ public class FileHelper {
             String id = wholeID.indexOf(":") > -1 ? wholeID.split(":")[1] : wholeID.indexOf(";") > -1 ? wholeID
                     .split(";")[1] : wholeID;
 
-            String[] column = { MediaStore.Images.Media.DATA };
+            String[] column = {MediaStore.Images.Media.DATA};
 
             // where id is equal to
             String sel = MediaStore.Images.Media._ID + "=?";
 
             Cursor cursor = context.getContentResolver().query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, column,
-                    sel, new String[] { id }, null);
+                    sel, new String[]{id}, null);
 
             int columnIndex = cursor.getColumnIndex(column[0]);
 
@@ -106,7 +106,7 @@ public class FileHelper {
 
     @SuppressLint("NewApi")
     public static String getRealPathFromURI_API11to18(Context context, Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
+        String[] proj = {MediaStore.Images.Media.DATA};
         String result = null;
 
         try {
@@ -125,7 +125,7 @@ public class FileHelper {
     }
 
     public static String getRealPathFromURI_BelowAPI11(Context context, Uri contentUri) {
-        String[] proj = { MediaStore.Images.Media.DATA };
+        String[] proj = {MediaStore.Images.Media.DATA};
         String result = null;
 
         try {
@@ -144,7 +144,7 @@ public class FileHelper {
      * Returns an input stream based on given URI string.
      *
      * @param uriString the URI string from which to obtain the input stream
-     * @param cordova the current application context
+     * @param cordova   the current application context
      * @return an input stream into the data at the given URI or null if given an invalid URI string
      * @throws IOException
      */
@@ -153,7 +153,7 @@ public class FileHelper {
         InputStream returnValue = null;
         if (uriString.startsWith("content")) {
             Uri uri = Uri.parse(uriString);
-            returnValue = ((Activity)activityContext).getContentResolver().openInputStream(uri);
+            returnValue = ((Activity) activityContext).getContentResolver().openInputStream(uri);
         } else if (uriString.startsWith("file://")) {
             int question = uriString.indexOf("?");
             if (question > -1) {
@@ -162,11 +162,11 @@ public class FileHelper {
             if (uriString.startsWith("file:///android_asset/")) {
                 Uri uri = Uri.parse(uriString);
                 String relativePath = uri.getPath().substring(15);
-                returnValue = ((Activity)activityContext).getAssets().open(relativePath);
+                returnValue = ((Activity) activityContext).getAssets().open(relativePath);
             } else {
                 // might still be content so try that first
                 try {
-                    returnValue = ((Activity)activityContext).getContentResolver().openInputStream(Uri.parse(uriString));
+                    returnValue = ((Activity) activityContext).getContentResolver().openInputStream(Uri.parse(uriString));
                 } catch (Exception e) {
                     returnValue = null;
                 }
@@ -207,7 +207,7 @@ public class FileHelper {
         }
         return MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
     }
-    
+
     /**
      * Returns the mime type of the data specified by the given URI string.
      *
@@ -219,7 +219,7 @@ public class FileHelper {
 
         Uri uri = Uri.parse(uriString);
         if (uriString.startsWith("content://")) {
-            mimeType = ((Activity)activityContext).getContentResolver().getType(uri);
+            mimeType = ((Activity) activityContext).getContentResolver().getType(uri);
         } else {
             mimeType = getMimeTypeForExtension(uri.getPath());
         }
