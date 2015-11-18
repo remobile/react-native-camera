@@ -8,7 +8,7 @@ npm install @remobile/react-native-camera --save
 ### Installation (iOS)
 * Drag RCTCamera.xcodeproj to your project on Xcode.
 * Click on your main project file (the one that represents the .xcodeproj) select Build Phases and drag libRCTCamera.a from the Products folder inside the RCTCamera.xcodeproj.
-* Look for Header Search Paths and make sure it contains both $(SRCROOT)/../react-native/React as recursive.
+* Look for Header Search Paths and make sure it contains both $(SRCROOT)/../../../react-native/React as recursive.
 
 ### Installation (Android)
 ```gradle
@@ -92,8 +92,8 @@ var {
     Image
 } = React;
 
-var Camera = require('react-native-camera');
-var Button = require('react-native-simple-button');
+var Camera = require('@remobile/react-native-camera');
+var Button = require('@remobile/react-native-simple-button');
 
 module.exports = React.createClass({
     getInitialState () {
@@ -106,13 +106,9 @@ module.exports = React.createClass({
             quality: 50,
             allowEdit: false,
             destinationType: Camera.DestinationType.DATA_URL,
-            encodingType: Camera.EncodingType.PNG,
         };
-        Camera.getPicture(options, (result) => {
-            console.log(result);
-            if (!result.error) {
-                this.setState({image: {uri:'data:image/png;base64,'+result.imageData}});
-            }
+        Camera.getPicture(options, (imageData) => {
+            this.setState({image: {uri:'data:image/jpeg;base64,'+imageData}});
         });
     },
     capturePhotoEdit() {
@@ -120,12 +116,9 @@ module.exports = React.createClass({
             quality: 50,
             allowEdit: true,
             destinationType: Camera.DestinationType.DATA_URL,
-            encodingType: Camera.EncodingType.PNG,
         };
-        Camera.getPicture(options, (result) => {
-            if (!result.error) {
-                this.setState({image: {uri:'data:image/png;base64,'+result.imageData}});
-            }
+        Camera.getPicture(options, (imageData) => {
+            this.setState({image: {uri:'data:image/jpeg;base64,'+imageData}});
         });
     },
     getPhoto(source) {
@@ -136,10 +129,10 @@ module.exports = React.createClass({
             sourceType: source,
             encodingType: Camera.EncodingType.PNG,
         };
-        Camera.getPicture(options, (result) => {
-            if (!result.error) {
-                this.setState({image: {uri:'data:image/png;base64,'+result.imageData}});
-            }
+        Camera.getPicture(options, (imageData) => {
+                this.setState({image: {uri:'data:image/png;base64,'+imageData}});
+        }, (error) => {
+                console.log(error);
         });
     },
     render() {
@@ -184,7 +177,6 @@ var styles = StyleSheet.create({
 
 ### HELP
 * look https://github.com/apache/cordova-plugin-camera
-* different is callback(result) var {error, imageData} = result;
 
 
 ### thanks

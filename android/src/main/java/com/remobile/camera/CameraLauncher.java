@@ -48,7 +48,12 @@ import android.util.Base64;
 import android.util.Log;
 import android.content.pm.PackageManager;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.facebook.common.logging.FLog;
+import com.remobile.cordova.*;
 import com.facebook.react.bridge.*;
 
 /**
@@ -98,8 +103,8 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
     private Uri scanMe;                     // Uri of image to be added to content store
     private Uri croppedUri;
 
+    private CallbackContext callbackContext;
     private Context mActivityContext;
-    private Callback callback;
 
     public CameraLauncher(ReactApplicationContext reactContext, Context activityContext) {
         super(reactContext);
@@ -107,57 +112,79 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
     }
 
     @Override
-    public String getName() {
-        return "RCTCamera";
-    }
-
+    public String getName() { return "Camera"; }
+    protected Activity getActivity() { return (Activity) mActivityContext; }
 
     @ReactMethod
-    public void takePicture(ReadableArray args, Callback callback) throws Exception {
-        this.callback = callback;
-        WritableMap result = Arguments.createMap();
-        result.putNull("error");
-
-        int srcType = CAMERA;
-        int destType = FILE_URI;
-        this.saveToPhotoAlbum = false;
-        this.targetHeight = 0;
-        this.targetWidth = 0;
-        this.encodingType = JPEG;
-        this.mediaType = PICTURE;
-        this.mQuality = 80;
-
-        this.mQuality = args.getInt(0);
-        destType = args.getInt(1);
-        srcType = args.getInt(2);
-        this.targetWidth = args.getInt(3);
-        this.targetHeight = args.getInt(4);
-        this.encodingType = args.getInt(5);
-        this.mediaType = args.getInt(6);
-        this.allowEdit = args.getBoolean(7);
-        this.correctOrientation = args.getBoolean(8);
-        this.saveToPhotoAlbum = args.getBoolean(9);
-
-        // If the user specifies a 0 or smaller width/height
-        // make it -1 so later comparisons succeed
-        if (this.targetWidth < 1) {
-            this.targetWidth = -1;
-        }
-        if (this.targetHeight < 1) {
-            this.targetHeight = -1;
-        }
-
+    public void takePicture(ReadableArray args, Callback success, Callback error) throws Exception {
+        String action = "takePicture";
         try {
-            if (srcType == CAMERA) {
-                this.takePicture(destType, encodingType);
-            } else if ((srcType == PHOTOLIBRARY) || (srcType == SAVEDPHOTOALBUM)) {
-                this.getImage(srcType, destType, encodingType);
-            }
-        } catch (IllegalArgumentException e) {
-            result.putString("error", "Illegal Argument Exception");
-            this.callback.invoke(result);
-            return;
+            this.execute(action, JsonConvert.reactToJSON(args), new CallbackContext(success, error));
+        } catch (Exception ex) {
+            FLog.e(LOG_TAG, "Unexpected error:" + ex.getMessage());
         }
+    }
+
+    /**
+     * Executes the request and returns PluginResult.
+     *
+     * @param action            The action to execute.
+     * @param args              JSONArry of arguments for the plugin.
+     * @param callbackContext   The callback id used when calling back into JavaScript.
+     * @return                  A PluginResult object with a status and message.
+     */
+    public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
+        this.callbackContext = callbackContext;
+
+        if (action.equals("takePicture")) {
+            int srcType = CAMERA;
+            int destType = FILE_URI;
+            this.saveToPhotoAlbum = false;
+            this.targetHeight = 0;
+            this.targetWidth = 0;
+            this.encodingType = JPEG;
+            this.mediaType = PICTURE;
+            this.mQuality = 80;
+
+            this.mQuality = args.getInt(0);
+            destType = args.getInt(1);
+            srcType = args.getInt(2);
+            this.targetWidth = args.getInt(3);
+            this.targetHeight = args.getInt(4);
+            this.encodingType = args.getInt(5);
+            this.mediaType = args.getInt(6);
+            this.allowEdit = args.getBoolean(7);
+            this.correctOrientation = args.getBoolean(8);
+            this.saveToPhotoAlbum = args.getBoolean(9);
+
+            // If the user specifies a 0 or smaller width/height
+            // make it -1 so later comparisons succeed
+            if (this.targetWidth < 1) {
+                this.targetWidth = -1;
+            }
+            if (this.targetHeight < 1) {
+                this.targetHeight = -1;
+            }
+
+             try {
+                if (srcType == CAMERA) {
+                    this.takePicture(destType, encodingType);
+                }
+                else if ((srcType == PHOTOLIBRARY) || (srcType == SAVEDPHOTOALBUM)) {
+                    this.getImage(srcType, destType, encodingType);
+                }
+            }
+            catch (IllegalArgumentException e)
+            {
+                callbackContext.error("Illegal Argument Exception");
+                PluginResult r = new PluginResult(PluginResult.Status.ERROR);
+                callbackContext.sendPluginResult(r);
+                return true;
+            }
+            
+            return true;
+        }
+        return false;
     }
 
     //--------------------------------------------------------------------------
@@ -170,11 +197,11 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         // SD Card Mounted
         if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
             cache = new File(Environment.getExternalStorageDirectory().getAbsolutePath() +
-                    "/Android/data/" + mActivityContext.getPackageName() + "/cache/");
+                    "/Android/data/" + this.getActivity().getPackageName() + "/cache/");
         }
         // Use internal storage
         else {
-            cache = mActivityContext.getCacheDir();
+            cache = this.getActivity().getCacheDir();
         }
 
         // Create the cache directory if it doesn't exist
@@ -186,15 +213,14 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
      * Take a picture with the camera.
      * When an image is captured or the camera view is cancelled, the result is returned
      * in CordovaActivity.onActivityResult, which forwards the result to this.onActivityResult.
-     * <p/>
+     *
      * The image can either be returned as a base64 string or a URI that points to the file.
      * To display base64 string in an img tag, set the source to:
-     * img.src="data:image/jpeg;base64,"+result;
+     *      img.src="data:image/jpeg;base64,"+result;
      * or to display URI in an img tag
-     * img.src=result;
+     *      img.src=result;
      *
-     * @param quality    Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
-     * @param returnType Set the type of image to return.
+     * @param returnType        Set the type of image to return.
      */
     public void takePicture(int returnType, int encodingType) {
         // Save the number of images currently on disk for later
@@ -208,12 +234,16 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         intent.putExtra(android.provider.MediaStore.EXTRA_OUTPUT, Uri.fromFile(photo));
         this.imageUri = Uri.fromFile(photo);
 
-        if (this.mActivityContext != null) {
+        if (this.getActivity() != null) {
             // Let's check to make sure the camera is actually installed. (Legacy Nexus 7 code)
-            PackageManager mPm = mActivityContext.getPackageManager();
-            if (intent.resolveActivity(mPm) != null) {
-                ((Activity) mActivityContext).startActivityForResult(intent, (CAMERA + 1) * 16 + returnType + 1);
-            } else {
+            PackageManager mPm = this.getActivity().getPackageManager();
+            if(intent.resolveActivity(mPm) != null)
+            {
+
+                this.getActivity().startActivityForResult(intent, (CAMERA + 1) * 16 + returnType + 1);
+            }
+            else
+            {
                 FLog.d(LOG_TAG, "Error: You don't have a default camera.  Your device may not be CTS complaint.");
             }
         }
@@ -240,13 +270,13 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
     }
 
 
+
     /**
      * Get image from photo library.
      *
-     * @param quality      Compression quality hint (0-100: 0=low quality & high compression, 100=compress of max quality)
-     * @param srcType      The album to get image from.
-     * @param returnType   Set the type of image to return.
-     * @param encodingType
+     * @param srcType           The album to get image from.
+     * @param returnType        Set the type of image to return.
+     * @param encodingType 
      */
     // TODO: Images selected from SDCARD don't display correctly, but from CAMERA ALBUM do!
     // TODO: Images from kitkat filechooser not going into crop function
@@ -277,85 +307,90 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
             }
         } else if (this.mediaType == VIDEO) {
-            intent.setType("video/*");
-            title = GET_VIDEO;
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("video/*");
+                title = GET_VIDEO;
+          intent.setAction(Intent.ACTION_GET_CONTENT);
+          intent.addCategory(Intent.CATEGORY_OPENABLE);
         } else if (this.mediaType == ALLMEDIA) {
             // I wanted to make the type 'image/*, video/*' but this does not work on all versions
-            // of android so I had to go with the wildcard search.
-            intent.setType("*/*");
-            title = GET_All;
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
+                // of android so I had to go with the wildcard search.
+                intent.setType("*/*");
+                title = GET_All;
+          intent.setAction(Intent.ACTION_GET_CONTENT);
+          intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
-        if (this.mActivityContext != null) {
-            ((Activity) mActivityContext).startActivityForResult(Intent.createChooser(intent,
+        if (this.getActivity() != null) {
+            this.getActivity().startActivityForResult(Intent.createChooser(intent,
                     new String(title)), (srcType + 1) * 16 + returnType + 1);
         }
     }
 
-    /**
-     * Brings up the UI to perform crop on passed image URI
-     *
-     * @param picUri
-     */
-    private void performCrop(Uri picUri, int destType, Intent cameraIntent) {
-        try {
-            Intent cropIntent = new Intent("com.android.camera.action.CROP");
-            // indicate image type and Uri
-            cropIntent.setDataAndType(picUri, "image/*");
-            // set crop properties
-            cropIntent.putExtra("crop", "true");
+  /**
+   * Brings up the UI to perform crop on passed image URI
+   * 
+   * @param picUri
+   */
+  private void performCrop(Uri picUri, int destType, Intent cameraIntent) {
+    try {
+      Intent cropIntent = new Intent("com.android.camera.action.CROP");
+      // indicate image type and Uri
+      cropIntent.setDataAndType(picUri, "image/*");
+      // set crop properties
+      cropIntent.putExtra("crop", "true");
 
-            // indicate output X and Y
-            if (targetWidth > 0) {
-                cropIntent.putExtra("outputX", targetWidth);
-            }
-            if (targetHeight > 0) {
-                cropIntent.putExtra("outputY", targetHeight);
-            }
-            if (targetHeight > 0 && targetWidth > 0 && targetWidth == targetHeight) {
-                cropIntent.putExtra("aspectX", 1);
-                cropIntent.putExtra("aspectY", 1);
-            }
-            // create new file handle to get full resolution crop
-            croppedUri = Uri.fromFile(new File(getTempDirectoryPath(), System.currentTimeMillis() + ".jpg"));
-            cropIntent.putExtra("output", croppedUri);
+      // indicate output X and Y
+      if (targetWidth > 0) {
+          cropIntent.putExtra("outputX", targetWidth);
+      }
+      if (targetHeight > 0) {
+          cropIntent.putExtra("outputY", targetHeight);
+      }
+        if (targetHeight > 0 && targetWidth > 0 && targetWidth == targetHeight) {
+          cropIntent.putExtra("aspectX", 1);
+          cropIntent.putExtra("aspectY", 1);
+      }
+      // create new file handle to get full resolution crop
+      croppedUri = Uri.fromFile(new File(getTempDirectoryPath(), System.currentTimeMillis() + ".jpg"));
+      cropIntent.putExtra("output", croppedUri);
 
-            // start the activity - we handle returning in onActivityResult
+      // start the activity - we handle returning in onActivityResult
 
-            if (this.mActivityContext != null) {
-                ((Activity) mActivityContext).startActivityForResult(cropIntent, CROP_CAMERA + destType);
-            }
-        } catch (ActivityNotFoundException anfe) {
-            Log.e(LOG_TAG, "Crop operation not supported on this device");
-            try {
-                processResultFromCamera(destType, cameraIntent);
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(LOG_TAG, "Unable to write to file");
-            }
-        }
+      if (this.getActivity() != null) {
+          this.getActivity().startActivityForResult(
+                  cropIntent, CROP_CAMERA + destType);
+      }
+    } catch (ActivityNotFoundException anfe) {
+      FLog.e(LOG_TAG, "Crop operation not supported on this device");
+      try {
+          processResultFromCamera(destType, cameraIntent);
+      }
+      catch (IOException e)
+      {
+          e.printStackTrace();
+          FLog.e(LOG_TAG, "Unable to write to file");
+      }
     }
+  }
 
     /**
      * Applies all needed transformation to the image received from the camera.
      *
-     * @param destType In which form should we return the image
-     * @param intent   An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
+     * @param destType          In which form should we return the image
+     * @param intent            An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     private void processResultFromCamera(int destType, Intent intent) throws IOException {
         int rotate = 0;
-        WritableMap result = Arguments.createMap();
 
         // Create an ExifHelper to save the exif data that is lost during compression
         ExifHelper exif = new ExifHelper();
         String sourcePath;
         try {
-            if (allowEdit && croppedUri != null) {
+            if(allowEdit && croppedUri != null)
+            {
                 sourcePath = FileHelper.stripFileProtocol(croppedUri.toString());
-            } else {
+            }
+            else
+            {
                 sourcePath = getTempDirectoryPath() + "/.Pic.jpg";
             }
 
@@ -373,16 +408,18 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
 
         // If sending base64 image back
         if (destType == DATA_URL) {
-            if (croppedUri != null) {
+            if(croppedUri != null) {
                 bitmap = getScaledBitmap(FileHelper.stripFileProtocol(croppedUri.toString()));
-            } else {
+            }
+            else
+            {
                 bitmap = getScaledBitmap(FileHelper.stripFileProtocol(imageUri.toString()));
             }
             if (bitmap == null) {
                 // Try to get the bitmap from intent.
-                bitmap = (Bitmap) intent.getExtras().get("data");
+                bitmap = (Bitmap)intent.getExtras().get("data");
             }
-
+            
             // Double-check the bitmap.
             if (bitmap == null) {
                 Log.d(LOG_TAG, "I either have a null image path or bitmap");
@@ -415,11 +452,11 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
             }
 
             // If all this is true we shouldn't compress the image.
-            if (this.targetHeight == -1 && this.targetWidth == -1 && this.mQuality == 100 &&
+            if (this.targetHeight == -1 && this.targetWidth == -1 && this.mQuality == 100 && 
                     !this.correctOrientation) {
                 writeUncompressedImage(uri);
-                result.putString("imageData", uri.toString());
-                this.callback.invoke(result);
+
+                this.callbackContext.success(uri.toString());
             } else {
                 bitmap = getScaledBitmap(FileHelper.stripFileProtocol(imageUri.toString()));
 
@@ -428,7 +465,7 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 }
 
                 // Add compressed version of captured image to returned media store Uri
-                OutputStream os = mActivityContext.getContentResolver().openOutputStream(uri);
+                OutputStream os = this.getActivity().getContentResolver().openOutputStream(uri);
                 bitmap.compress(Bitmap.CompressFormat.JPEG, this.mQuality, os);
                 os.close();
 
@@ -441,14 +478,13 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 }
 
                 //Broadcast change to File System on MediaStore
-                if (this.saveToPhotoAlbum) {
+                if(this.saveToPhotoAlbum) {
                     refreshGallery(uri);
                 }
 
 
                 // Send Uri back to JavaScript for viewing image
-                result.putString("imageData", uri.toString());
-                this.callback.invoke(result);
+                this.callbackContext.success(uri.toString());
 
             }
         } else {
@@ -459,23 +495,25 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         bitmap = null;
     }
 
-    private String getPicutresPath() {
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "IMG_" + timeStamp + ".jpg";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
-        String galleryPath = storageDir.getAbsolutePath() + "/" + imageFileName;
-        return galleryPath;
-    }
+private String getPicutresPath()
+{
+    String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    String imageFileName = "IMG_" + timeStamp + ".jpg";
+    File storageDir = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES);
+    String galleryPath = storageDir.getAbsolutePath() + "/" + imageFileName;
+    return galleryPath;
+}
 
-    private void refreshGallery(Uri contentUri) {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        mediaScanIntent.setData(contentUri);
-        mActivityContext.sendBroadcast(mediaScanIntent);
-    }
+private void refreshGallery(Uri contentUri)
+{
+    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+    mediaScanIntent.setData(contentUri);
+    this.getActivity().sendBroadcast(mediaScanIntent);
+}
 
 
-    private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
+private String ouputModifiedBitmap(Bitmap bitmap, Uri uri) throws IOException {
         // Create an ExifHelper to save the exif data that is lost during compression
         String modifiedPath = getTempDirectoryPath() + "/modified.jpg";
 
@@ -484,7 +522,7 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         os.close();
 
         // Some content: URIs do not map to file paths (e.g. picasa).
-        String realPath = FileHelper.getRealPath(uri, this.mActivityContext);
+        String realPath = FileHelper.getRealPath(uri, this.getActivity());
         ExifHelper exif = new ExifHelper();
         if (realPath != null && this.encodingType == JPEG) {
             try {
@@ -502,14 +540,13 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         return modifiedPath;
     }
 
-    /**
+/**
      * Applies all needed transformation to the image received from the gallery.
      *
-     * @param destType In which form should we return the image
-     * @param intent   An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
+     * @param destType          In which form should we return the image
+     * @param intent            An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     private void processResultFromGallery(int destType, Intent intent) {
-        WritableMap result = Arguments.createMap();
         Uri uri = intent.getData();
         if (uri == null) {
             if (croppedUri != null) {
@@ -524,19 +561,18 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         // If you ask for video or all media type you will automatically get back a file URI
         // and there will be no attempt to resize any returned data
         if (this.mediaType != PICTURE) {
-            result.putString("imageData", uri.toString());
-            this.callback.invoke(result);
-        } else {
+            this.callbackContext.success(uri.toString());
+        }
+        else {
             // This is a special case to just return the path as no scaling,
             // rotating, nor compressing needs to be done
             if (this.targetHeight == -1 && this.targetWidth == -1 &&
                     (destType == FILE_URI || destType == NATIVE_URI) && !this.correctOrientation) {
-                result.putString("imageData", uri.toString());
-                this.callback.invoke(result);
+                this.callbackContext.success(uri.toString());
             } else {
                 String uriString = uri.toString();
                 // Get the path to the image. Makes loading so much easier.
-                String mimeType = FileHelper.getMimeType(uriString, this.mActivityContext);
+                String mimeType = FileHelper.getMimeType(uriString, this.getActivity());
                 // If we don't have a valid image so quit.
                 if (!("image/jpeg".equalsIgnoreCase(mimeType) || "image/png".equalsIgnoreCase(mimeType))) {
                     Log.d(LOG_TAG, "I either have a null image path or bitmap");
@@ -577,21 +613,20 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 // If sending filename back
                 else if (destType == FILE_URI || destType == NATIVE_URI) {
                     // Did we modify the image?
-                    if ((this.targetHeight > 0 && this.targetWidth > 0) ||
-                            (this.correctOrientation && this.orientationCorrected)) {
+                    if ( (this.targetHeight > 0 && this.targetWidth > 0) ||
+                            (this.correctOrientation && this.orientationCorrected) ) {
                         try {
                             String modifiedPath = this.ouputModifiedBitmap(bitmap, uri);
                             // The modified image is cached by the app in order to get around this and not have to delete you
                             // application cache I'm adding the current system time to the end of the file url.
-                            result.putString("imageData", "file://" + modifiedPath + "?" + System.currentTimeMillis());
-                            this.callback.invoke(result);
+                            this.callbackContext.success("file://" + modifiedPath + "?" + System.currentTimeMillis());
                         } catch (Exception e) {
                             e.printStackTrace();
                             this.failPicture("Error retrieving image.");
                         }
-                    } else {
-                        result.putString("imageData", uri.toString());
-                        this.callback.invoke(result);
+                    }
+                    else {
+                        this.callbackContext.success(uri.toString());
                     }
                 }
                 if (bitmap != null) {
@@ -602,14 +637,14 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
             }
         }
     }
-
+    
     /**
      * Called when the camera view exits.
      *
-     * @param requestCode The request code originally supplied to startActivityForResult(),
-     *                    allowing you to identify who this result came from.
-     * @param resultCode  The integer result code returned by the child activity through its setResult().
-     * @param intent      An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
+     * @param requestCode       The request code originally supplied to startActivityForResult(),
+     *                          allowing you to identify who this result came from.
+     * @param resultCode        The integer result code returned by the child activity through its setResult().
+     * @param intent            An Intent, which can return result data to the caller (various data can be attached to Intent "extras").
      */
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
@@ -628,7 +663,7 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                     processResultFromCamera(destType, intent);
                 } catch (IOException e) {
                     e.printStackTrace();
-                    Log.e(LOG_TAG, "Unable to write to file");
+                    FLog.e(LOG_TAG, "Unable to write to file");
                 }
 
             }// If cancelled
@@ -646,10 +681,12 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
             // If image available
             if (resultCode == Activity.RESULT_OK) {
                 try {
-                    if (this.allowEdit) {
+                    if(this.allowEdit)
+                    {
                         Uri tmpFile = Uri.fromFile(new File(getTempDirectoryPath(), ".Pic.jpg"));
                         performCrop(tmpFile, destType, intent);
-                    } else {
+                    }
+                    else {
                         this.processResultFromCamera(destType, intent);
                     }
                 } catch (IOException e) {
@@ -672,9 +709,11 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         else if ((srcType == PHOTOLIBRARY) || (srcType == SAVEDPHOTOALBUM)) {
             if (resultCode == Activity.RESULT_OK && intent != null) {
                 this.processResultFromGallery(destType, intent);
-            } else if (resultCode == Activity.RESULT_CANCELED) {
+            }
+            else if (resultCode == Activity.RESULT_CANCELED) {
                 this.failPicture("Selection cancelled.");
-            } else {
+            }
+            else {
                 this.failPicture("Selection did not complete!");
             }
         }
@@ -682,9 +721,9 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
 
     private int getImageOrientation(Uri uri) {
         int rotate = 0;
-        String[] cols = {MediaStore.Images.Media.ORIENTATION};
+        String[] cols = { MediaStore.Images.Media.ORIENTATION };
         try {
-            Cursor cursor = mActivityContext.getContentResolver().query(uri,
+            Cursor cursor = this.getActivity().getContentResolver().query(uri,
                     cols, null, null, null);
             if (cursor != null) {
                 cursor.moveToPosition(0);
@@ -713,10 +752,13 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
             matrix.setRotate(rotate, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
         }
 
-        try {
+        try
+        {
             bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
             exif.resetOrientation();
-        } catch (OutOfMemoryError oom) {
+        }
+        catch (OutOfMemoryError oom)
+        {
             // You can run out of memory if the image is very large:
             // http://simonmacdonald.blogspot.ca/2012/07/change-to-camera-code-in-phonegap-190.html
             // If this happens, simply do not rotate the image and return it unmodified.
@@ -740,7 +782,7 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         OutputStream os = null;
         try {
             fis = new FileInputStream(FileHelper.stripFileProtocol(imageUri.toString()));
-            os = mActivityContext.getContentResolver().openOutputStream(uri);
+            os = this.getActivity().getContentResolver().openOutputStream(uri);
             byte[] buffer = new byte[4096];
             int len;
             while ((len = fis.read(buffer)) != -1) {
@@ -752,14 +794,14 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 try {
                     os.close();
                 } catch (IOException e) {
-                    FLog.d(LOG_TAG, "Exception while closing output stream.");
+                    FLog.d(LOG_TAG,"Exception while closing output stream.");
                 }
             }
             if (fis != null) {
                 try {
                     fis.close();
                 } catch (IOException e) {
-                    FLog.d(LOG_TAG, "Exception while closing file input stream.");
+                    FLog.d(LOG_TAG,"Exception while closing file input stream.");
                 }
             }
         }
@@ -775,11 +817,11 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         values.put(android.provider.MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
         Uri uri;
         try {
-            uri = mActivityContext.getContentResolver().insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+            uri = this.getActivity().getContentResolver().insert(android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
         } catch (RuntimeException e) {
             FLog.d(LOG_TAG, "Can't write to external media storage.");
             try {
-                uri = mActivityContext.getContentResolver().insert(android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI, values);
+                uri = this.getActivity().getContentResolver().insert(android.provider.MediaStore.Images.Media.INTERNAL_CONTENT_URI, values);
             } catch (RuntimeException ex) {
                 FLog.d(LOG_TAG, "Can't write to internal media storage.");
                 return null;
@@ -791,9 +833,9 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
     /**
      * Return a scaled bitmap based on the target width and height
      *
-     * @param imagePath
+     * @param imageUrl
      * @return
-     * @throws IOException
+     * @throws IOException 
      */
     private Bitmap getScaledBitmap(String imageUrl) throws IOException {
         // If no new width or height were specified return the original bitmap
@@ -801,14 +843,14 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
             InputStream fileStream = null;
             Bitmap image = null;
             try {
-                fileStream = FileHelper.getInputStreamFromUriString(imageUrl, mActivityContext);
+                fileStream = FileHelper.getInputStreamFromUriString(imageUrl, this.getActivity());
                 image = BitmapFactory.decodeStream(fileStream);
             } finally {
                 if (fileStream != null) {
                     try {
                         fileStream.close();
                     } catch (IOException e) {
-                        FLog.d(LOG_TAG, "Exception while closing file input stream.");
+                        FLog.d(LOG_TAG,"Exception while closing file input stream.");
                     }
                 }
             }
@@ -820,23 +862,24 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         options.inJustDecodeBounds = true;
         InputStream fileStream = null;
         try {
-            fileStream = FileHelper.getInputStreamFromUriString(imageUrl, mActivityContext);
+            fileStream = FileHelper.getInputStreamFromUriString(imageUrl, this.getActivity());
             BitmapFactory.decodeStream(fileStream, null, options);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    FLog.d(LOG_TAG, "Exception while closing file input stream.");
+                    FLog.d(LOG_TAG,"Exception while closing file input stream.");
                 }
             }
         }
-
+        
         //CB-2292: WTF? Why is the width null?
-        if (options.outWidth == 0 || options.outHeight == 0) {
+        if(options.outWidth == 0 || options.outHeight == 0)
+        {
             return null;
         }
-
+        
         // determine the correct aspect ratio
         int[] widthHeight = calculateAspectRatio(options.outWidth, options.outHeight);
 
@@ -845,14 +888,14 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
         options.inSampleSize = calculateSampleSize(options.outWidth, options.outHeight, this.targetWidth, this.targetHeight);
         Bitmap unscaledBitmap = null;
         try {
-            fileStream = FileHelper.getInputStreamFromUriString(imageUrl, mActivityContext);
+            fileStream = FileHelper.getInputStreamFromUriString(imageUrl, this.getActivity());
             unscaledBitmap = BitmapFactory.decodeStream(fileStream, null, options);
         } finally {
             if (fileStream != null) {
                 try {
                     fileStream.close();
                 } catch (IOException e) {
-                    FLog.d(LOG_TAG, "Exception while closing file input stream.");
+                    FLog.d(LOG_TAG,"Exception while closing file input stream.");
                 }
             }
         }
@@ -921,15 +964,15 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
      * @return
      */
     public static int calculateSampleSize(int srcWidth, int srcHeight, int dstWidth, int dstHeight) {
-        final float srcAspect = (float) srcWidth / (float) srcHeight;
-        final float dstAspect = (float) dstWidth / (float) dstHeight;
+        final float srcAspect = (float)srcWidth / (float)srcHeight;
+        final float dstAspect = (float)dstWidth / (float)dstHeight;
 
         if (srcAspect > dstAspect) {
             return srcWidth / dstWidth;
         } else {
             return srcHeight / dstHeight;
         }
-    }
+      }
 
     /**
      * Creates a cursor that can be used to determine how many images we have.
@@ -937,9 +980,9 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
      * @return a cursor
      */
     private Cursor queryImgDB(Uri contentStore) {
-        return mActivityContext.getContentResolver().query(
+        return this.getActivity().getContentResolver().query(
                 contentStore,
-                new String[]{MediaStore.Images.Media._ID},
+                new String[] { MediaStore.Images.Media._ID },
                 null,
                 null,
                 null);
@@ -947,7 +990,6 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
 
     /**
      * Cleans up after picture taking. Checking for duplicates and that kind of stuff.
-     *
      * @param newImage
      */
     private void cleanup(int imageType, Uri oldImage, Uri newImage, Bitmap bitmap) {
@@ -992,14 +1034,13 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 id--;
             }
             Uri uri = Uri.parse(contentStore + "/" + id);
-            mActivityContext.getContentResolver().delete(uri, null, null);
+            this.getActivity().getContentResolver().delete(uri, null, null);
             cursor.close();
         }
     }
 
     /**
      * Determine if we are storing the images in internal or external storage
-     *
      * @return Uri
      */
     private Uri whichContentStore() {
@@ -1022,9 +1063,7 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
                 byte[] code = jpeg_data.toByteArray();
                 byte[] output = Base64.encode(code, Base64.NO_WRAP);
                 String js_out = new String(output);
-                WritableMap result = Arguments.createMap();
-                result.putString("imageData", js_out);
-                this.callback.invoke(result);
+                this.callbackContext.success(js_out);
                 js_out = null;
                 output = null;
                 code = null;
@@ -1041,24 +1080,22 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
      * @param err
      */
     public void failPicture(String err) {
-        WritableMap result = Arguments.createMap();
-        result.putString("error", err);
-        this.callback.invoke(result);
+        this.callbackContext.error(err);
     }
 
     private void scanForGallery(Uri newImage) {
         this.scanMe = newImage;
-        if (this.conn != null) {
+        if(this.conn != null) {
             this.conn.disconnect();
         }
-        this.conn = new MediaScannerConnection(mActivityContext.getApplicationContext(), this);
+        this.conn = new MediaScannerConnection(this.getActivity().getApplicationContext(), this);
         conn.connect();
     }
 
     public void onMediaScannerConnected() {
-        try {
+        try{
             this.conn.scanFile(this.scanMe.toString(), "image/*");
-        } catch (java.lang.IllegalStateException e) {
+        } catch (java.lang.IllegalStateException e){
             FLog.e(LOG_TAG, "Can't scan file in MediaScanner after taking picture");
         }
 

@@ -63,10 +63,12 @@ typedef NSUInteger CDVMediaType;
 
 @end
 
+@class CDVCommandDelegateImpl;
 @interface CDVCameraPicker : UIImagePickerController
 
 @property (strong) CDVPictureOptions* pictureOptions;
 
+@property (strong) CDVCommandDelegateImpl* commandDelegate;
 @property (copy)   NSString* postUrl;
 @property (strong) UIPopoverController* pickerPopoverController;
 @property (assign) BOOL cropToSize;
@@ -83,8 +85,6 @@ typedef NSUInteger CDVMediaType;
                        UIPopoverControllerDelegate,
                        CLLocationManagerDelegate>
 {}
-@property (nonatomic, strong) RCTResponseSenderBlock callback;
-
 @property (strong) CDVCameraPicker* pickerController;
 @property (strong) NSMutableDictionary *metadata;
 @property (strong, nonatomic) CLLocationManager *locationManager;

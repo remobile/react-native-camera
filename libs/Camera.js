@@ -44,8 +44,10 @@ Camera.CameraPopoverOptions = CameraPopoverOptions;
  * @param {Function} errorCallback
  * @param {Object} options
  */
-Camera.getPicture = function(options, callback) {
+Camera.getPicture = function(options, successCallback, errorCallback) {
     options = options || {};
+    successCallback = successCallback || ()=>{};
+    errorCallback = errorCallback || ()=>{};
     var getValue = (value, defaultValue) => {
         return value === undefined ? defaultValue : value;
     }
@@ -66,11 +68,13 @@ Camera.getPicture = function(options, callback) {
     var args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
         mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions, cameraDirection];
 
-    CRTCamera.takePicture(args, callback);
+    CRTCamera.takePicture(args, successCallback, errorCallback);
 };
 
-Camera.cleanup = function(callback) {
-    CRTCamera.cleanup(callback);
+Camera.cleanup = function(successCallback, errorCallback) {
+    successCallback = successCallback || ()=>{};
+    errorCallback = errorCallback || ()=>{};
+    CRTCamera.cleanup(successCallback, errorCallback);
 };
 
 module.exports = Camera;

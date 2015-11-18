@@ -14,6 +14,10 @@
         "ios",
         "android",
         "camera",
+        "edit",
+        "picture",
+        "take picture",
+        "scale picture",
         "remobile",
         "mobile"
     ],
@@ -24,5 +28,8 @@
     "repository": {
         "type": "git",
         "url": "git://github.com/remobile/react-native-camera.git"
+    },
+    "peerDependencies": {
+        "@remobile/react-native-cordova": "latest"
     }
 }
