@@ -32,7 +32,6 @@ import java.util.Date;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -104,16 +103,16 @@ public class CameraLauncher extends ReactContextBaseJavaModule implements MediaS
     private Uri croppedUri;
 
     private CallbackContext callbackContext;
-    private Context mActivityContext;
+    private Activity activity;
 
-    public CameraLauncher(ReactApplicationContext reactContext, Context activityContext) {
+    public CameraLauncher(ReactApplicationContext reactContext, Activity activity) {
         super(reactContext);
-        mActivityContext = activityContext;
+        this.activity = activity;
     }
 
     @Override
     public String getName() { return "Camera"; }
-    protected Activity getActivity() { return (Activity) mActivityContext; }
+    protected Activity getActivity() { return activity; }
 
     @ReactMethod
     public void takePicture(ReadableArray args, Callback success, Callback error) throws Exception {
