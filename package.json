@@ -30,6 +30,6 @@
         "url": "git://github.com/remobile/react-native-camera.git"
     },
     "peerDependencies": {
-        "@remobile/react-native-cordova": "latest"
+        "@remobile/react-native-cordova": "^1.0.1"
     }
 }
