@@ -31,8 +31,6 @@
 #import <MobileCoreServices/UTCoreTypes.h>
 #import <objc/message.h>
 
-#import "CDVCommandDelegateImpl.h"
-
 #define CDV_PHOTO_PREFIX @"cdv_photo_"
 
 static NSSet* org_apache_cordova_validArrowDirections;
@@ -47,27 +45,28 @@ static NSString* toBase64(NSData* data) {
 
 @implementation CDVPictureOptions
 
-+ (instancetype) createFromTakePictureArguments:(NSArray *)args
++ (instancetype) createFromTakePictureArguments:(CDVInvokedUrlCommand*)command
 {
     CDVPictureOptions* pictureOptions = [[CDVPictureOptions alloc] init];
+
+    pictureOptions.quality = [command argumentAtIndex:0 withDefault:@(50)];
+    pictureOptions.destinationType = [[command argumentAtIndex:1 withDefault:@(DestinationTypeFileUri)] unsignedIntegerValue];
+    pictureOptions.sourceType = [[command argumentAtIndex:2 withDefault:@(UIImagePickerControllerSourceTypeCamera)] unsignedIntegerValue];
     
-    pictureOptions.quality = args[0]?:@50;
-    pictureOptions.destinationType = [args[1]?:@(DestinationTypeFileUri) unsignedIntegerValue];
-    pictureOptions.sourceType = [args[2]?:@(UIImagePickerControllerSourceTypeCamera) unsignedIntegerValue];
-    NSNumber* targetWidth = args[3]?:nil;
-    NSNumber* targetHeight = args[4]?:nil;
+    NSNumber* targetWidth = [command argumentAtIndex:3 withDefault:nil];
+    NSNumber* targetHeight = [command argumentAtIndex:4 withDefault:nil];
     pictureOptions.targetSize = CGSizeMake(0, 0);
     if ((targetWidth != nil) && (targetHeight != nil)) {
         pictureOptions.targetSize = CGSizeMake([targetWidth floatValue], [targetHeight floatValue]);
     }
-    
-    pictureOptions.encodingType = [args[5]?:@(EncodingTypeJPEG) unsignedIntegerValue];
-    pictureOptions.mediaType = [args[6]?:@(MediaTypePicture) unsignedIntegerValue];
-    pictureOptions.allowsEditing = [args[7]?:@(NO) boolValue];
-    pictureOptions.correctOrientation = [args[8]?:@(NO) boolValue];
-    pictureOptions.saveToPhotoAlbum = [args[9]?:@(NO) boolValue];
-    pictureOptions.popoverOptions = args[10]?:nil;
-    pictureOptions.cameraDirection = [args[11]?:@(MediaTypePicture) unsignedIntegerValue];
+
+    pictureOptions.encodingType = [[command argumentAtIndex:5 withDefault:@(EncodingTypeJPEG)] unsignedIntegerValue];
+    pictureOptions.mediaType = [[command argumentAtIndex:6 withDefault:@(MediaTypePicture)] unsignedIntegerValue];
+    pictureOptions.allowsEditing = [[command argumentAtIndex:7 withDefault:@(NO)] boolValue];
+    pictureOptions.correctOrientation = [[command argumentAtIndex:8 withDefault:@(NO)] boolValue];
+    pictureOptions.saveToPhotoAlbum = [[command argumentAtIndex:9 withDefault:@(NO)] boolValue];
+    pictureOptions.popoverOptions = [command argumentAtIndex:10 withDefault:nil];
+    pictureOptions.cameraDirection = [[command argumentAtIndex:11 withDefault:@(UIImagePickerControllerCameraDeviceRear)] unsignedIntegerValue];
     
     pictureOptions.popoverSupported = NO;
     pictureOptions.usesGeolocation = NO;
@@ -87,6 +86,10 @@ static NSString* toBase64(NSData* data) {
 @implementation CDVCamera
 
 RCT_EXPORT_MODULE(Camera)
+RCT_EXPORT_CORDOVA_METHOD(takePicture);
+RCT_EXPORT_CORDOVA_METHOD(cleanup);
+RCT_EXPORT_CORDOVA_METHOD2(_repositionPopover, repositionPopover);
+
 
 + (void)initialize
 {
@@ -109,18 +112,18 @@ RCT_EXPORT_MODULE(Camera)
 - (BOOL)popoverSupported
 {
     return (NSClassFromString(@"UIPopoverController") != nil) &&
-    (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
+           (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad);
 }
 
-RCT_EXPORT_METHOD(takePicture:(NSArray *)args success:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error)
+- (void)takePicture:(CDVInvokedUrlCommand*)command
 {
-    CDVCommandDelegateImpl* commandDelegate = [[CDVCommandDelegateImpl alloc]initWithCallback:success error:error];
     self.hasPendingOperation = YES;
     
     __weak CDVCamera* weakSelf = self;
-    
-    [commandDelegate runInBackground:^{
-        CDVPictureOptions* pictureOptions = [CDVPictureOptions createFromTakePictureArguments:args];
+
+    [self.commandDelegate runInBackground:^{
+        
+        CDVPictureOptions* pictureOptions = [CDVPictureOptions createFromTakePictureArguments:command];
         pictureOptions.popoverSupported = [weakSelf popoverSupported];
         pictureOptions.usesGeolocation = [weakSelf usesGeolocation];
         pictureOptions.cropToSize = NO;
@@ -129,10 +132,10 @@ RCT_EXPORT_METHOD(takePicture:(NSArray *)args success:(RCTResponseSenderBlock)su
         if (!hasCamera) {
             NSLog(@"Camera.getPicture: source type %lu not available.", (unsigned long)pictureOptions.sourceType);
             CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"No camera available"];
-            [commandDelegate sendPluginResult:result];
+            [weakSelf.commandDelegate sendPluginResult:result callbackId:command.callbackId];
             return;
         }
-        
+
         // Validate the app has permission to access the camera
         if (pictureOptions.sourceType == UIImagePickerControllerSourceTypeCamera && [AVCaptureDevice respondsToSelector:@selector(authorizationStatusForMediaType:)]) {
             AVAuthorizationStatus authStatus = [AVCaptureDevice authorizationStatusForMediaType:AVMediaTypeVideo];
@@ -155,12 +158,12 @@ RCT_EXPORT_METHOD(takePicture:(NSArray *)args success:(RCTResponseSenderBlock)su
                 });
             }
         }
-        
+
         CDVCameraPicker* cameraPicker = [CDVCameraPicker createFromPictureOptions:pictureOptions];
         weakSelf.pickerController = cameraPicker;
         
         cameraPicker.delegate = weakSelf;
-        cameraPicker.commandDelegate = commandDelegate;
+        cameraPicker.callbackId = command.callbackId;
         
         // Perform UI operations on the main thread
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -170,7 +173,7 @@ RCT_EXPORT_METHOD(takePicture:(NSArray *)args success:(RCTResponseSenderBlock)su
                 [[[weakSelf pickerController] pickerPopoverController] setDelegate:nil];
                 [[weakSelf pickerController] setPickerPopoverController:nil];
             }
-            
+
             if ([weakSelf popoverSupported] && (pictureOptions.sourceType != UIImagePickerControllerSourceTypeCamera)) {
                 if (cameraPicker.pickerPopoverController == nil) {
                     cameraPicker.pickerPopoverController = [[NSClassFromString(@"UIPopoverController") alloc] initWithContentViewController:cameraPicker];
@@ -178,7 +181,7 @@ RCT_EXPORT_METHOD(takePicture:(NSArray *)args success:(RCTResponseSenderBlock)su
                 [weakSelf displayPopover:pictureOptions.popoverOptions];
                 weakSelf.hasPendingOperation = NO;
             } else {
-                [[CDVCommandDelegateImpl getTopPresentedViewController] presentViewController:cameraPicker animated:YES completion:^{
+                [[CDVPlugin presentViewController] presentViewController:cameraPicker animated:YES completion:^{
                     weakSelf.hasPendingOperation = NO;
                 }];
             }
@@ -193,29 +196,31 @@ RCT_EXPORT_METHOD(takePicture:(NSArray *)args success:(RCTResponseSenderBlock)su
     if (buttonIndex == 1) {
         [[UIApplication sharedApplication] openURL:[NSURL URLWithString:UIApplicationOpenSettingsURLString]];
     }
-    
+
     // Dismiss the view
     [[self.pickerController presentingViewController] dismissViewControllerAnimated:YES completion:nil];
-    
+
     CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"has no access to camera"];   // error callback expects string ATM
-    
-    [self.pickerController.commandDelegate sendPluginResult:result];
-    
+
+    [self.commandDelegate sendPluginResult:result callbackId:self.pickerController.callbackId];
+
     self.hasPendingOperation = NO;
     self.pickerController = nil;
 }
 
-RCT_EXPORT_METHOD(repositionPopover:(NSDictionary *)options)
+- (void)repositionPopover:(CDVInvokedUrlCommand*)command
 {
+    NSDictionary* options = [command argumentAtIndex:0 withDefault:nil];
+
     [self displayPopover:options];
 }
 
 - (NSInteger)integerValueForKey:(NSDictionary*)dict key:(NSString*)key defaultValue:(NSInteger)defaultValue
 {
     NSInteger value = defaultValue;
-    
+
     NSNumber* val = [dict valueForKey:key];  // value is an NSNumber
-    
+
     if (val != nil) {
         value = [val integerValue];
     }
@@ -229,7 +234,7 @@ RCT_EXPORT_METHOD(repositionPopover:(NSDictionary *)options)
     NSInteger width = 320;
     NSInteger height = 480;
     UIPopoverArrowDirection arrowDirection = UIPopoverArrowDirectionAny;
-    
+
     if (options) {
         x = [self integerValueForKey:options key:@"x" defaultValue:0];
         y = [self integerValueForKey:options key:@"y" defaultValue:32];
@@ -240,10 +245,10 @@ RCT_EXPORT_METHOD(repositionPopover:(NSDictionary *)options)
             arrowDirection = UIPopoverArrowDirectionAny;
         }
     }
-    
+
     [[[self pickerController] pickerPopoverController] setDelegate:self];
     [[[self pickerController] pickerPopoverController] presentPopoverFromRect:CGRectMake(x, y, width, height)
-                                                                       inView:[CDVCommandDelegateImpl getTopPresentedViewController].view
+                                                                       inView:[CDVPlugin presentViewController].view
                                                      permittedArrowDirections:arrowDirection
                                                                      animated:YES];
 }
@@ -259,20 +264,19 @@ RCT_EXPORT_METHOD(repositionPopover:(NSDictionary *)options)
     }
 }
 
-RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSenderBlock)error)
+- (void)cleanup:(CDVInvokedUrlCommand*)command
 {
-    CDVCommandDelegateImpl* commandDelegate = [[CDVCommandDelegateImpl alloc]initWithCallback:success error:error];
     // empty the tmp directory
     NSFileManager* fileMgr = [[NSFileManager alloc] init];
     NSError* err = nil;
     BOOL hasErrors = NO;
-    
+
     // clear contents of NSTemporaryDirectory
     NSString* tempDirectoryPath = NSTemporaryDirectory();
     NSDirectoryEnumerator* directoryEnumerator = [fileMgr enumeratorAtPath:tempDirectoryPath];
     NSString* fileName = nil;
     BOOL result;
-    
+
     while ((fileName = [directoryEnumerator nextObject])) {
         // only delete the files we created
         if (![fileName hasPrefix:CDV_PHOTO_PREFIX]) {
@@ -285,26 +289,27 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
             hasErrors = YES;
         }
     }
-    
+
     CDVPluginResult* pluginResult;
     if (hasErrors) {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_IO_EXCEPTION messageAsString:@"One or more files failed to be deleted."];
     } else {
         pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
     }
-    [commandDelegate sendPluginResult:pluginResult];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
 }
 
 - (void)popoverControllerDidDismissPopover:(id)popoverController
 {
     UIPopoverController* pc = (UIPopoverController*)popoverController;
-    
+
     [pc dismissPopoverAnimated:YES];
     pc.delegate = nil;
-    if (self.pickerController && self.pickerController.commandDelegate && self.pickerController.pickerPopoverController) {
+    if (self.pickerController && self.pickerController.callbackId && self.pickerController.pickerPopoverController) {
         self.pickerController.pickerPopoverController = nil;
+        CDVInvokedUrlCommand* callbackId = self.pickerController.callbackId;
         CDVPluginResult* result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"no image selected"];   // error callback expects string ATM
-        [self.pickerController.commandDelegate sendPluginResult:result];
+        [self.commandDelegate sendPluginResult:result callbackId:callbackId];
     }
     self.hasPendingOperation = NO;
 }
@@ -400,7 +405,7 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
     CDVPluginResult* result = nil;
     BOOL saveToPhotoAlbum = options.saveToPhotoAlbum;
     UIImage* image = nil;
-    
+
     switch (options.destinationType) {
         case DestinationTypeNativeUri:
         {
@@ -474,7 +479,7 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
         }
         
         if (result) {
-            [cameraPicker.commandDelegate sendPluginResult:result];
+            [weakSelf.commandDelegate sendPluginResult:result callbackId:cameraPicker.callbackId];
             weakSelf.hasPendingOperation = NO;
             weakSelf.pickerController = nil;
         }
@@ -494,7 +499,7 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingImage:(UIImage*)image editingInfo:(NSDictionary*)editingInfo
 {
     NSDictionary* imageInfo = [NSDictionary dictionaryWithObject:image forKey:UIImagePickerControllerOriginalImage];
-    
+
     [self imagePickerController:picker didFinishPickingMediaWithInfo:imageInfo];
 }
 
@@ -511,26 +516,26 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
             result = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:@"has no access to assets"];
         }
         
-        [cameraPicker.commandDelegate sendPluginResult:result];
+        [weakSelf.commandDelegate sendPluginResult:result callbackId:cameraPicker.callbackId];
         
         weakSelf.hasPendingOperation = NO;
         weakSelf.pickerController = nil;
     };
-    
+
     [[cameraPicker presentingViewController] dismissViewControllerAnimated:YES completion:invoke];
 }
 
 - (CLLocationManager*)locationManager
 {
-    if (locationManager != nil) {
-        return locationManager;
-    }
+	if (locationManager != nil) {
+		return locationManager;
+	}
     
-    locationManager = [[CLLocationManager alloc] init];
-    [locationManager setDesiredAccuracy:kCLLocationAccuracyNearestTenMeters];
-    [locationManager setDelegate:self];
+	locationManager = [[CLLocationManager alloc] init];
+	[locationManager setDesiredAccuracy:kCLLocationAccuracyNearestTenMeters];
+	[locationManager setDelegate:self];
     
-    return locationManager;
+	return locationManager;
 }
 
 - (void)locationManager:(CLLocationManager*)manager didUpdateToLocation:(CLLocation*)newLocation fromLocation:(CLLocation*)oldLocation
@@ -595,7 +600,7 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
     if (locationManager == nil) {
         return;
     }
-    
+
     [self.locationManager stopUpdatingLocation];
     self.locationManager = nil;
     
@@ -646,7 +651,7 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
     };
     
     if (result) {
-        [self.pickerController.commandDelegate sendPluginResult:result];
+        [self.commandDelegate sendPluginResult:result callbackId:self.pickerController.callbackId];
     }
     
     self.hasPendingOperation = NO;
@@ -673,7 +678,7 @@ RCT_EXPORT_METHOD(cleanup:(RCTResponseSenderBlock)success error:(RCTResponseSend
 {
     return nil;
 }
-
+    
 - (void)viewWillAppear:(BOOL)animated
 {
     SEL sel = NSSelectorFromString(@"setNeedsStatusBarAppearanceUpdate");

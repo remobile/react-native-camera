@@ -21,7 +21,7 @@
 #import <Foundation/Foundation.h>
 #import <CoreLocation/CoreLocation.h>
 #import <CoreLocation/CLLocationManager.h>
-#import "RCTBridgeModule.h"
+#import "CDVPlugin.h"
 
 enum CDVDestinationType {
     DestinationTypeDataUrl = 0,
@@ -61,14 +61,15 @@ typedef NSUInteger CDVMediaType;
 @property (assign) BOOL usesGeolocation;
 @property (assign) BOOL cropToSize;
 
++ (instancetype) createFromTakePictureArguments:(CDVInvokedUrlCommand*)command;
+
 @end
 
-@class CDVCommandDelegateImpl;
 @interface CDVCameraPicker : UIImagePickerController
 
 @property (strong) CDVPictureOptions* pictureOptions;
 
-@property (strong) CDVCommandDelegateImpl* commandDelegate;
+@property (strong)   CDVInvokedUrlCommand* callbackId;
 @property (copy)   NSString* postUrl;
 @property (strong) UIPopoverController* pickerPopoverController;
 @property (assign) BOOL cropToSize;
@@ -79,16 +80,30 @@ typedef NSUInteger CDVMediaType;
 
 // ======================================================================= //
 
-@interface CDVCamera : NSObject <RCTBridgeModule,
-                       UIImagePickerControllerDelegate,
+@interface CDVCamera : CDVPlugin <UIImagePickerControllerDelegate,
                        UINavigationControllerDelegate,
                        UIPopoverControllerDelegate,
                        CLLocationManagerDelegate>
 {}
+
 @property (strong) CDVCameraPicker* pickerController;
 @property (strong) NSMutableDictionary *metadata;
 @property (strong, nonatomic) CLLocationManager *locationManager;
 @property (strong) NSData* data;
+
+/*
+ * getPicture
+ *
+ * arguments:
+ *	1: this is the javascript function that will be called with the results, the first parameter passed to the
+ *		javascript function is the picture as a Base64 encoded string
+ *  2: this is the javascript function to be called if there was an error
+ * options:
+ *	quality: integer between 1 and 100
+ */
+- (void)takePicture:(CDVInvokedUrlCommand*)command;
+- (void)cleanup:(CDVInvokedUrlCommand*)command;
+- (void)repositionPopover:(CDVInvokedUrlCommand*)command;
 
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary*)info;
 - (void)imagePickerController:(UIImagePickerController*)picker didFinishPickingImage:(UIImage*)image editingInfo:(NSDictionary*)editingInfo;
