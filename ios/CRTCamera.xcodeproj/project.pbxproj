@@ -10,7 +10,6 @@
 		327632A11BF96DD6004DA88E /* CDVCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 327632A01BF96DD6004DA88E /* CDVCamera.m */; };
 		32A87EB71BF5A07D0048D713 /* CDVJpegHeaderWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A87EB41BF5A07D0048D713 /* CDVJpegHeaderWriter.m */; };
 		32A87EB81BF5A07D0048D713 /* UIImage+CropScaleOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A87EB61BF5A07D0048D713 /* UIImage+CropScaleOrientation.m */; };
-		32A87EBB1BF5A2CD0048D713 /* NSData+Base64.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A87EBA1BF5A2CD0048D713 /* NSData+Base64.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -34,8 +33,6 @@
 		32A87EB41BF5A07D0048D713 /* CDVJpegHeaderWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDVJpegHeaderWriter.m; sourceTree = "<group>"; };
 		32A87EB51BF5A07D0048D713 /* UIImage+CropScaleOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CropScaleOrientation.h"; sourceTree = "<group>"; };
 		32A87EB61BF5A07D0048D713 /* UIImage+CropScaleOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CropScaleOrientation.m"; sourceTree = "<group>"; };
-		32A87EB91BF5A2CD0048D713 /* NSData+Base64.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Base64.h"; sourceTree = "<group>"; };
-		32A87EBA1BF5A2CD0048D713 /* NSData+Base64.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Base64.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,8 +67,6 @@
 			children = (
 				3276329F1BF96DD6004DA88E /* CDVCamera.h */,
 				327632A01BF96DD6004DA88E /* CDVCamera.m */,
-				32A87EB91BF5A2CD0048D713 /* NSData+Base64.h */,
-				32A87EBA1BF5A2CD0048D713 /* NSData+Base64.m */,
 				32A87EB21BF5A07D0048D713 /* CDVExif.h */,
 				32A87EB31BF5A07D0048D713 /* CDVJpegHeaderWriter.h */,
 				32A87EB41BF5A07D0048D713 /* CDVJpegHeaderWriter.m */,
@@ -138,7 +133,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				327632A11BF96DD6004DA88E /* CDVCamera.m in Sources */,
-				32A87EBB1BF5A2CD0048D713 /* NSData+Base64.m in Sources */,
 				32A87EB81BF5A07D0048D713 /* UIImage+CropScaleOrientation.m in Sources */,
 				32A87EB71BF5A07D0048D713 /* CDVJpegHeaderWriter.m in Sources */,
 			);
