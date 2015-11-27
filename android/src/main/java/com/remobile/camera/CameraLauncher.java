@@ -49,7 +49,6 @@ import android.content.pm.PackageManager;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import com.facebook.common.logging.FLog;
 import com.remobile.cordova.*;
@@ -115,7 +114,7 @@ public class CameraLauncher extends CordovaPlugin implements MediaScannerConnect
     }
 
     @ReactMethod
-    public void takePicture(ReadableArray args, Callback success, Callback error) throws Exception {
+    public void takePicture(ReadableArray args, Callback success, Callback error) {
         String action = "takePicture";
         try {
             this.execute(action, JsonConvert.reactToJSON(args), new CallbackContext(success, error));
