@@ -1,6 +1,6 @@
 {
     "name": "@remobile/react-native-camera",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "A cordova camera for react-native, supprt for ios and android",
     "main": "index.js",
     "author": {
@@ -30,6 +30,6 @@
         "url": "git://github.com/remobile/react-native-camera.git"
     },
     "peerDependencies": {
-        "@remobile/react-native-cordova": "^1.0.1"
+        "@remobile/react-native-cordova": "^1.0.6"
     }
 }
