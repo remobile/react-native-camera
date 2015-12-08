@@ -7,9 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		327632A11BF96DD6004DA88E /* CDVCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 327632A01BF96DD6004DA88E /* CDVCamera.m */; };
-		32A87EB71BF5A07D0048D713 /* CDVJpegHeaderWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A87EB41BF5A07D0048D713 /* CDVJpegHeaderWriter.m */; };
-		32A87EB81BF5A07D0048D713 /* UIImage+CropScaleOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 32A87EB61BF5A07D0048D713 /* UIImage+CropScaleOrientation.m */; };
+		32F41D391C167004004A090F /* CDVCamera.m in Sources */ = {isa = PBXBuildFile; fileRef = 32F41D331C167004004A090F /* CDVCamera.m */; };
+		32F41D3A1C167004004A090F /* CDVJpegHeaderWriter.m in Sources */ = {isa = PBXBuildFile; fileRef = 32F41D361C167004004A090F /* CDVJpegHeaderWriter.m */; };
+		32F41D3B1C167004004A090F /* UIImage+CropScaleOrientation.m in Sources */ = {isa = PBXBuildFile; fileRef = 32F41D381C167004004A090F /* UIImage+CropScaleOrientation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,14 +25,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		3276329F1BF96DD6004DA88E /* CDVCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDVCamera.h; sourceTree = "<group>"; };
-		327632A01BF96DD6004DA88E /* CDVCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDVCamera.m; sourceTree = "<group>"; };
-		32A87E981BF598330048D713 /* libCRTCamera.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libCRTCamera.a; sourceTree = BUILT_PRODUCTS_DIR; };
-		32A87EB21BF5A07D0048D713 /* CDVExif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDVExif.h; sourceTree = "<group>"; };
-		32A87EB31BF5A07D0048D713 /* CDVJpegHeaderWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CDVJpegHeaderWriter.h; sourceTree = "<group>"; };
-		32A87EB41BF5A07D0048D713 /* CDVJpegHeaderWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CDVJpegHeaderWriter.m; sourceTree = "<group>"; };
-		32A87EB51BF5A07D0048D713 /* UIImage+CropScaleOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+CropScaleOrientation.h"; sourceTree = "<group>"; };
-		32A87EB61BF5A07D0048D713 /* UIImage+CropScaleOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+CropScaleOrientation.m"; sourceTree = "<group>"; };
+		32A87E981BF598330048D713 /* libRCTCamera.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTCamera.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		32F41D321C167004004A090F /* CDVCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVCamera.h; path = RCTCamera/CDVCamera.h; sourceTree = SOURCE_ROOT; };
+		32F41D331C167004004A090F /* CDVCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVCamera.m; path = RCTCamera/CDVCamera.m; sourceTree = SOURCE_ROOT; };
+		32F41D341C167004004A090F /* CDVExif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVExif.h; path = RCTCamera/CDVExif.h; sourceTree = SOURCE_ROOT; };
+		32F41D351C167004004A090F /* CDVJpegHeaderWriter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVJpegHeaderWriter.h; path = RCTCamera/CDVJpegHeaderWriter.h; sourceTree = SOURCE_ROOT; };
+		32F41D361C167004004A090F /* CDVJpegHeaderWriter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVJpegHeaderWriter.m; path = RCTCamera/CDVJpegHeaderWriter.m; sourceTree = SOURCE_ROOT; };
+		32F41D371C167004004A090F /* UIImage+CropScaleOrientation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+CropScaleOrientation.h"; path = "RCTCamera/UIImage+CropScaleOrientation.h"; sourceTree = SOURCE_ROOT; };
+		32F41D381C167004004A090F /* UIImage+CropScaleOrientation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+CropScaleOrientation.m"; path = "RCTCamera/UIImage+CropScaleOrientation.m"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,7 +49,7 @@
 		32A87E8F1BF598330048D713 = {
 			isa = PBXGroup;
 			children = (
-				32A87E9A1BF598330048D713 /* CRTCamera */,
+				32A87E9A1BF598330048D713 /* RCTCamera */,
 				32A87E991BF598330048D713 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -57,31 +57,31 @@
 		32A87E991BF598330048D713 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32A87E981BF598330048D713 /* libCRTCamera.a */,
+				32A87E981BF598330048D713 /* libRCTCamera.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		32A87E9A1BF598330048D713 /* CRTCamera */ = {
+		32A87E9A1BF598330048D713 /* RCTCamera */ = {
 			isa = PBXGroup;
 			children = (
-				3276329F1BF96DD6004DA88E /* CDVCamera.h */,
-				327632A01BF96DD6004DA88E /* CDVCamera.m */,
-				32A87EB21BF5A07D0048D713 /* CDVExif.h */,
-				32A87EB31BF5A07D0048D713 /* CDVJpegHeaderWriter.h */,
-				32A87EB41BF5A07D0048D713 /* CDVJpegHeaderWriter.m */,
-				32A87EB51BF5A07D0048D713 /* UIImage+CropScaleOrientation.h */,
-				32A87EB61BF5A07D0048D713 /* UIImage+CropScaleOrientation.m */,
+				32F41D321C167004004A090F /* CDVCamera.h */,
+				32F41D331C167004004A090F /* CDVCamera.m */,
+				32F41D341C167004004A090F /* CDVExif.h */,
+				32F41D351C167004004A090F /* CDVJpegHeaderWriter.h */,
+				32F41D361C167004004A090F /* CDVJpegHeaderWriter.m */,
+				32F41D371C167004004A090F /* UIImage+CropScaleOrientation.h */,
+				32F41D381C167004004A090F /* UIImage+CropScaleOrientation.m */,
 			);
-			path = CRTCamera;
+			path = RCTCamera;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		32A87E971BF598330048D713 /* CRTCamera */ = {
+		32A87E971BF598330048D713 /* RCTCamera */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "CRTCamera" */;
+			buildConfigurationList = 32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "RCTCamera" */;
 			buildPhases = (
 				32A87E941BF598330048D713 /* Sources */,
 				32A87E951BF598330048D713 /* Frameworks */,
@@ -91,9 +91,9 @@
 			);
 			dependencies = (
 			);
-			name = CRTCamera;
-			productName = CRTCamera;
-			productReference = 32A87E981BF598330048D713 /* libCRTCamera.a */;
+			name = RCTCamera;
+			productName = RCTCamera;
+			productReference = 32A87E981BF598330048D713 /* libRCTCamera.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -110,7 +110,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 32A87E931BF598330048D713 /* Build configuration list for PBXProject "CRTCamera" */;
+			buildConfigurationList = 32A87E931BF598330048D713 /* Build configuration list for PBXProject "RCTCamera" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -122,7 +122,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32A87E971BF598330048D713 /* CRTCamera */,
+				32A87E971BF598330048D713 /* RCTCamera */,
 			);
 		};
 /* End PBXProject section */
@@ -132,9 +132,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				327632A11BF96DD6004DA88E /* CDVCamera.m in Sources */,
-				32A87EB81BF5A07D0048D713 /* UIImage+CropScaleOrientation.m in Sources */,
-				32A87EB71BF5A07D0048D713 /* CDVJpegHeaderWriter.m in Sources */,
+				32F41D391C167004004A090F /* CDVCamera.m in Sources */,
+				32F41D3B1C167004004A090F /* UIImage+CropScaleOrientation.m in Sources */,
+				32F41D3A1C167004004A090F /* CDVJpegHeaderWriter.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -264,7 +264,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		32A87E931BF598330048D713 /* Build configuration list for PBXProject "CRTCamera" */ = {
+		32A87E931BF598330048D713 /* Build configuration list for PBXProject "RCTCamera" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32A87EAA1BF598330048D713 /* Debug */,
@@ -273,7 +273,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "CRTCamera" */ = {
+		32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "RCTCamera" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32A87EAD1BF598330048D713 /* Debug */,
