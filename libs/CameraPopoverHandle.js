@@ -26,7 +26,7 @@ var {
     NativeModules
 } = React;
 
-var Camera = NativeModules.CRTCamera;
+var Camera = NativeModules.Camera;
 
 /**
  * A handle to an image picker popover.

@@ -25,7 +25,7 @@ var {
     NativeModules
 } = React;
 
-var CRTCamera = NativeModules.Camera;
+var RCTCamera = NativeModules.Camera;
 
 var CameraConstants = require('./CameraConstants.js');
 var CameraPopoverHandle = require('./CameraPopoverHandle.js');
@@ -68,13 +68,13 @@ Camera.getPicture = function(options, successCallback, errorCallback) {
     var args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
         mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions, cameraDirection];
 
-    CRTCamera.takePicture(args, successCallback, errorCallback);
+    RCTCamera.takePicture(args, successCallback, errorCallback);
 };
 
 Camera.cleanup = function(successCallback, errorCallback) {
     successCallback = successCallback || ()=>{};
     errorCallback = errorCallback || ()=>{};
-    CRTCamera.cleanup(successCallback, errorCallback);
+    RCTCamera.cleanup(successCallback, errorCallback);
 };
 
 module.exports = Camera;
