@@ -14,7 +14,7 @@ npm install @remobile/react-native-camera --save
 ```gradle
 ...
 include ':react-native-camera'
-project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-camera/android')
+project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/@remobile/react-native-camera/android')
 ```
 
 * In `android/app/build.gradle`

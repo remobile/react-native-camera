@@ -1,6 +1,6 @@
 {
     "name": "@remobile/react-native-camera",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "A cordova camera for react-native, supprt for ios and android",
     "main": "index.js",
     "author": {

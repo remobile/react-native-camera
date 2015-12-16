@@ -46,8 +46,8 @@ Camera.CameraPopoverOptions = CameraPopoverOptions;
  */
 Camera.getPicture = function(options, successCallback, errorCallback) {
     options = options || {};
-    successCallback = successCallback || ()=>{};
-    errorCallback = errorCallback || ()=>{};
+    successCallback = successCallback || (()=>{});
+    errorCallback = errorCallback || (()=>{});
     var getValue = (value, defaultValue) => {
         return value === undefined ? defaultValue : value;
     }
@@ -72,8 +72,8 @@ Camera.getPicture = function(options, successCallback, errorCallback) {
 };
 
 Camera.cleanup = function(successCallback, errorCallback) {
-    successCallback = successCallback || ()=>{};
-    errorCallback = errorCallback || ()=>{};
+    successCallback = successCallback || (()=>{});
+    errorCallback = errorCallback || (()=>{});
     RCTCamera.cleanup(successCallback, errorCallback);
 };
 
