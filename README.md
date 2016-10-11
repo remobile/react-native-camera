@@ -1,5 +1,5 @@
 # React Native Camera (remobile)
-A cordova camera for react-native, supprt for ios and android
+A cordova camera for react-native, support for ios and android
 
 ## Installation
 ```sh
@@ -14,7 +14,7 @@ npm install @remobile/react-native-camera --save
 ```gradle
 ...
 include ':react-native-camera'
-project(':react-native-camera').projectDir = new File(rootProject.projectDir, '../node_modules/@remobile/react-native-camera/android')
+project(':react-native-camera').projectDir = new File(settingsDir, '../node_modules/@remobile/react-native-camera/android')
 ```
 
 * In `android/app/build.gradle`
@@ -27,45 +27,21 @@ dependencies {
 }
 ```
 
-* register module (in MainActivity.java)
+* register module (in MainApplication.java)
 
 ```java
-import com.remobile.camera.*;  // <--- import
+......
+import com.remobile.camera.RCTCameraPackage;  // <--- import
 
-public class MainActivity extends Activity implements DefaultHardwareBackBtnHandler {
-  ......
-  private RCTCameraPackage mCameraPackage; // <--- declare package
-  @Override
-  protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-    mReactRootView = new ReactRootView(this);
-    mCameraPackage = new RCTCameraPackage(this);// <--- alloc package
+......
 
-    mReactInstanceManager = ReactInstanceManager.builder()
-      .setApplication(getApplication())
-      .setBundleAssetName("index.android.bundle")
-      .setJSMainModuleName("index.android")
-      .addPackage(new MainReactPackage())
-      .addPackage(mCameraPackage)              // <------ add here
-      .setUseDeveloperSupport(BuildConfig.DEBUG)
-      .setInitialLifecycleState(LifecycleState.RESUMED)
-      .build();
-
-    mReactRootView.startReactApplication(mReactInstanceManager, "ExampleRN", null);
-
-    setContentView(mReactRootView);
-  }
-
-  ......
-
-  // <----- add start
-  @Override
-  public void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
-      super.onActivityResult(requestCode, resultCode, data);
-      mCameraPackage.onActivityResult(requestCode, resultCode, data);
-  }
-  // <----- add end
+@Override
+protected List<ReactPackage> getPackages() {
+   ......
+   new RCTCameraPackage(),            // <------ add here
+   ......
 }
+
 ```
 
 ### Screencasts
@@ -85,12 +61,13 @@ public class MainActivity extends Activity implements DefaultHardwareBackBtnHand
 
 ### Example
 ```js
-var React = require('react-native');
+var React = require('react');
+var ReactNative = require('react-native');
 var {
     StyleSheet,
     View,
     Image
-} = React;
+} = ReactNative;
 
 var Camera = require('@remobile/react-native-camera');
 var Button = require('@remobile/react-native-simple-button');
@@ -181,3 +158,6 @@ var styles = StyleSheet.create({
 
 ### thanks
 * this project come from https://github.com/apache/cordova-plugin-camera
+
+### see detail use
+* https://github.com/remobile/react-native-template

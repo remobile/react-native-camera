@@ -19,22 +19,17 @@
  *
 */
 
-'use strict';
-
-var React = require('react-native');
-var {
-    NativeModules
-} = React;
-
-var Camera = NativeModules.Camera;
-
 /**
+ * @ignore in favour of iOS' one
  * A handle to an image picker popover.
  */
+var isandroid = require('@remobile/react-native-cordova').isandroid
+var IOSCameraPopoverHandle = require('ios/CameraPopoverHandle');
+
 var CameraPopoverHandle = function() {
     this.setPosition = function(popoverOptions) {
-        Camera.repositionPopover(popoverOptions);
+        console.log('CameraPopoverHandle.setPosition is only supported on iOS.');
     };
 };
 
-module.exports = CameraPopoverHandle;
+module.exports = isandroid ?  CameraPopoverHandle : IOSCameraPopoverHandle;
