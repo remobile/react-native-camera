@@ -84,9 +84,9 @@ module.exports = React.createClass({
             allowEdit: false,
             destinationType: Camera.DestinationType.DATA_URL,
         };
-        Camera.getPicture(options, (imageData) => {
+        Camera.getPicture((imageData) => {
             this.setState({image: {uri:'data:image/jpeg;base64,'+imageData}});
-        });
+        },options);
     },
     capturePhotoEdit() {
         var options = {
@@ -94,9 +94,9 @@ module.exports = React.createClass({
             allowEdit: true,
             destinationType: Camera.DestinationType.DATA_URL,
         };
-        Camera.getPicture(options, (imageData) => {
+        Camera.getPicture((imageData) => {
             this.setState({image: {uri:'data:image/jpeg;base64,'+imageData}});
-        });
+        }, options);
     },
     getPhoto(source) {
         var options = {
@@ -106,11 +106,11 @@ module.exports = React.createClass({
             sourceType: source,
             encodingType: Camera.EncodingType.PNG,
         };
-        Camera.getPicture(options, (imageData) => {
+        Camera.getPicture((imageData) => {
                 this.setState({image: {uri:'data:image/png;base64,'+imageData}});
         }, (error) => {
                 console.log(error);
-        });
+        }, options);
     },
     render() {
         return (
