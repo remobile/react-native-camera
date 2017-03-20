@@ -7,7 +7,7 @@ npm install @remobile/react-native-camera --save
 ```
 ### Installation (iOS)
 * Drag RCTCamera.xcodeproj to your project on Xcode.
-* Click on your main project file (the one that represents the .xcodeproj) select Build Phases and drag libRCTCamera.a from the Products folder inside the RCTCamera.xcodeproj.
+* Click on your main project file (the one that represents the .xcodeproj) select Build Phases and drag libRCTRemobileCamera.a from the Products folder inside the RCTCamera.xcodeproj.
 * Look for Header Search Paths and make sure it contains both $(SRCROOT)/../../../react-native/React as recursive.
 
 ### Installation (Android)

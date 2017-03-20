@@ -25,7 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		32A87E981BF598330048D713 /* libRCTCamera.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTCamera.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		32A87E981BF598330048D713 /* libRCTRemobileCamera.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRCTRemobileCamera.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		32F41D321C167004004A090F /* CDVCamera.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVCamera.h; path = RCTCamera/CDVCamera.h; sourceTree = SOURCE_ROOT; };
 		32F41D331C167004004A090F /* CDVCamera.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CDVCamera.m; path = RCTCamera/CDVCamera.m; sourceTree = SOURCE_ROOT; };
 		32F41D341C167004004A090F /* CDVExif.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CDVExif.h; path = RCTCamera/CDVExif.h; sourceTree = SOURCE_ROOT; };
@@ -57,7 +57,7 @@
 		32A87E991BF598330048D713 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				32A87E981BF598330048D713 /* libRCTCamera.a */,
+				32A87E981BF598330048D713 /* libRCTRemobileCamera.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,9 +79,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		32A87E971BF598330048D713 /* RCTCamera */ = {
+		32A87E971BF598330048D713 /* RCTRemobileCamera */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "RCTCamera" */;
+			buildConfigurationList = 32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "RCTRemobileCamera" */;
 			buildPhases = (
 				32A87E941BF598330048D713 /* Sources */,
 				32A87E951BF598330048D713 /* Frameworks */,
@@ -91,9 +91,9 @@
 			);
 			dependencies = (
 			);
-			name = RCTCamera;
+			name = RCTRemobileCamera;
 			productName = RCTCamera;
-			productReference = 32A87E981BF598330048D713 /* libRCTCamera.a */;
+			productReference = 32A87E981BF598330048D713 /* libRCTRemobileCamera.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 /* End PBXNativeTarget section */
@@ -122,7 +122,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				32A87E971BF598330048D713 /* RCTCamera */,
+				32A87E971BF598330048D713 /* RCTRemobileCamera */,
 			);
 		};
 /* End PBXProject section */
@@ -271,7 +271,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "RCTCamera" */ = {
+		32A87EAC1BF598330048D713 /* Build configuration list for PBXNativeTarget "RCTRemobileCamera" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				32A87EAD1BF598330048D713 /* Debug */,
