@@ -19,12 +19,12 @@
  *
 */
 
-var argscheck = require('@remobile/react-native-cordova').argscheck,
+const argscheck = require('@remobile/react-native-cordova').argscheck,
     exec = require('@remobile/react-native-cordova').exec,
     isandroid = require('@remobile/react-native-cordova').isandroid,
     Camera = require('./CameraConstants');
     // XXX: commented out
-    //CameraPopoverHandle = require('./CameraPopoverHandle');
+    // CameraPopoverHandle = require('./CameraPopoverHandle');
 
 /**
  * @namespace navigator
@@ -33,10 +33,10 @@ var argscheck = require('@remobile/react-native-cordova').argscheck,
 /**
  * @exports camera
  */
-var cameraExport = {};
+const cameraExport = {};
 
 // Tack on the Camera Constants to the base camera plugin.
-for (var key in Camera) {
+for (const key in Camera) {
     cameraExport[key] = Camera[key];
 }
 
@@ -54,7 +54,7 @@ for (var key in Camera) {
  * // Show image
  * //
  * function cameraCallback(imageData) {
- *    var image = document.getElementById('myImage');
+ *    const image = document.getElementById('myImage');
  *    image.src = "data:image/jpeg;base64," + imageData;
  * }
  */
@@ -132,33 +132,33 @@ for (var key in Camera) {
  * @param {module:camera.onError} errorCallback
  * @param {module:camera.CameraOptions} options CameraOptions
  */
-cameraExport.getPicture = function(successCallback, errorCallback, options) {
+cameraExport.getPicture = function (successCallback, errorCallback, options) {
     argscheck.checkArgs('fFO', 'Camera.getPicture', arguments);
     options = options || {};
-    var _successCallback = (filePath)=>{
+    const _successCallback = (filePath) => {
         successCallback(filePath.replace(/^file:\/\//, ''));
     };
-    var getValue = argscheck.getValue;
+    const getValue = argscheck.getValue;
 
-    var quality = getValue(options.quality, 50);
-    var destinationType = getValue(options.destinationType, Camera.DestinationType.FILE_URI);
-    var sourceType = getValue(options.sourceType, Camera.PictureSourceType.CAMERA);
-    var targetWidth = getValue(options.targetWidth, -1);
-    var targetHeight = getValue(options.targetHeight, -1);
-    var encodingType = getValue(options.encodingType, Camera.EncodingType.JPEG);
-    var mediaType = getValue(options.mediaType, Camera.MediaType.PICTURE);
-    var allowEdit = !!options.allowEdit;
-    var correctOrientation = !!options.correctOrientation;
-    var saveToPhotoAlbum = !!options.saveToPhotoAlbum;
-    var popoverOptions = getValue(options.popoverOptions, null);
-    var cameraDirection = getValue(options.cameraDirection, Camera.Direction.BACK);
+    const quality = getValue(options.quality, 50);
+    const destinationType = getValue(options.destinationType, Camera.DestinationType.FILE_URI);
+    const sourceType = getValue(options.sourceType, Camera.PictureSourceType.CAMERA);
+    const targetWidth = getValue(options.targetWidth, -1);
+    const targetHeight = getValue(options.targetHeight, -1);
+    const encodingType = getValue(options.encodingType, Camera.EncodingType.JPEG);
+    const mediaType = getValue(options.mediaType, Camera.MediaType.PICTURE);
+    const allowEdit = !!options.allowEdit;
+    const correctOrientation = !!options.correctOrientation;
+    const saveToPhotoAlbum = !!options.saveToPhotoAlbum;
+    const popoverOptions = getValue(options.popoverOptions, null);
+    const cameraDirection = getValue(options.cameraDirection, Camera.Direction.BACK);
 
-    var args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
-                mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions, cameraDirection];
+    const args = [quality, destinationType, sourceType, targetWidth, targetHeight, encodingType,
+        mediaType, allowEdit, correctOrientation, saveToPhotoAlbum, popoverOptions, cameraDirection];
 
-    exec(_successCallback, errorCallback, "Camera", "takePicture", args);
+    exec(_successCallback, errorCallback, 'Camera', 'takePicture', args);
     // XXX: commented out
-    //return new CameraPopoverHandle();
+    // return new CameraPopoverHandle();
 };
 
 /**
@@ -182,9 +182,9 @@ cameraExport.getPicture = function(successCallback, errorCallback, options) {
  *     alert('Failed because: ' + message);
  * }
  */
-cameraExport.cleanup = function(successCallback, errorCallback) {
+cameraExport.cleanup = function (successCallback, errorCallback) {
     if (!isandroid) {
-        exec(successCallback, errorCallback, "Camera", "cleanup", []);
+        exec(successCallback, errorCallback, 'Camera', 'cleanup', []);
     }
 };
 

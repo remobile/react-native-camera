@@ -19,7 +19,7 @@
  *
 */
 
-var exec = require('@remobile/react-native-cordova').exec;
+const exec = require('@remobile/react-native-cordova').exec;
 
 /**
  * @namespace navigator
@@ -42,13 +42,13 @@ var exec = require('@remobile/react-native-cordova').exec;
  *
  * // Reposition the popover if the orientation changes.
  * window.onorientationchange = function() {
- *     var cameraPopoverHandle = new CameraPopoverHandle();
- *     var cameraPopoverOptions = new CameraPopoverOptions(0, 0, 100, 100, Camera.PopoverArrowDirection.ARROW_ANY);
+ *     const cameraPopoverHandle = new CameraPopoverHandle();
+ *     const cameraPopoverOptions = new CameraPopoverOptions(0, 0, 100, 100, Camera.PopoverArrowDirection.ARROW_ANY);
  *     cameraPopoverHandle.setPosition(cameraPopoverOptions);
  * }
  * @module CameraPopoverHandle
  */
-var CameraPopoverHandle = function() {
+const CameraPopoverHandle = function() {
     /**
      * Can be used to reposition the image selection dialog,
      * for example, when the device orientation changes.
@@ -58,7 +58,7 @@ var CameraPopoverHandle = function() {
      * @param {module:CameraPopoverOptions} popoverOptions
      */
     this.setPosition = function(popoverOptions) {
-        var args = [ popoverOptions ];
+        const args = [ popoverOptions ];
         exec(null, null, "Camera", "repositionPopover", args);
     };
 };

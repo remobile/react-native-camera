@@ -19,9 +19,9 @@
  *
 */
 
-var Camera = require('./Camera');
+const Camera = require('./Camera');
 
-/** 
+/**
  * @namespace navigator
  */
 
@@ -40,7 +40,7 @@ var Camera = require('./Camera');
  * @param {Number} [height=480] - height, in pixels, of the screen element onto which to anchor the popover.
  * @param {module:Camera.PopoverArrowDirection} [arrowDir=ARROW_ANY] - Direction the arrow on the popover should point.
  */
-var CameraPopoverOptions = function (x, y, width, height, arrowDir) {
+const CameraPopoverOptions = function (x, y, width, height, arrowDir) {
     // information of rectangle that popover should be anchored to
     this.x = x || 0;
     this.y = y || 32;

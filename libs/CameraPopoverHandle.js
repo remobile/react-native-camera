@@ -23,13 +23,13 @@
  * @ignore in favour of iOS' one
  * A handle to an image picker popover.
  */
-var isandroid = require('@remobile/react-native-cordova').isandroid
-var IOSCameraPopoverHandle = require('ios/CameraPopoverHandle');
+const isandroid = require('@remobile/react-native-cordova').isandroid;
+const IOSCameraPopoverHandle = require('ios/CameraPopoverHandle');
 
-var CameraPopoverHandle = function() {
-    this.setPosition = function(popoverOptions) {
+const CameraPopoverHandle = function () {
+    this.setPosition = function (popoverOptions) {
         console.log('CameraPopoverHandle.setPosition is only supported on iOS.');
     };
 };
 
-module.exports = isandroid ?  CameraPopoverHandle : IOSCameraPopoverHandle;
+module.exports = isandroid ? CameraPopoverHandle : IOSCameraPopoverHandle;
